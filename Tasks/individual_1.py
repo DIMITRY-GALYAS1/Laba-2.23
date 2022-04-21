@@ -9,11 +9,9 @@
 """
 
 import math
-from threading import Lock, Thread
+from threading import Thread
 
-
-stop_thread = False
-lock = Lock()
+ABSOLUTE_VALUE = 1e-07
 
 
 def compare_result(a, b):
@@ -30,12 +28,11 @@ def row_1():
     s = 0
     n = 0
     x = 0.7
-    e = 1e-07
     previous = 0
     actual = math.pow(x, n)
     s += actual
     n += 1
-    while abs(actual - previous) > e:
+    while abs(actual - previous) > ABSOLUTE_VALUE:
         previous = actual
         actual = math.pow(x, n)
         n += 1
@@ -47,12 +44,11 @@ def row_2():
     s = 0
     n = 0
     x = 1.2
-    e = 1e-07
     previous = 0
     actual = math.pow(-1, n) * (math.pow(x, n) / (math.pow(2, n + 1)))
     s += actual
     n += 1
-    while abs(actual - previous) > e:
+    while abs(actual - previous) > ABSOLUTE_VALUE:
         previous = actual
         actual = math.pow(-1, n) * (math.pow(x, n) / (math.pow(2, n + 1)))
         n += 1
@@ -61,10 +57,9 @@ def row_2():
 
 
 if __name__ == '__main__':
-    r1 = Thread(target=compare_result(row_1(), control_value()), daemon=True)
+    r1 = Thread(target=compare_result(row_1(), control_value()))
     r1.start()
-    r2 = Thread(target=compare_result(row_2(), control_value()), daemon=True)
+    r2 = Thread(target=compare_result(row_2(), control_value()))
     r2.start()
-    lock.acquire()
-    stop_thread = True
-    lock.release()
+    r1.join()
+    r2.join()
